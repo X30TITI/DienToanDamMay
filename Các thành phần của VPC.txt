@@ -1,0 +1,84 @@
+** Các thành phần của VPC:
++ IPv4 and IPv6 address blocks
++ Subnet: -Public subnet
+	 - Private subnet
++ Route tables
++ Internet connectivity
+ - Internet Gateway: 1 server trong VPC muốn giao tiếp với Internet thì cần có Internet Gateway
+ - NAT Gateway: 1 thành phần cho phép server ảo trong mạng private có thể kết nối tới Internet hoặc dịch vụ khác của AWS nhưng lại không cho Internet kết nối tới server đó.
+ - NAT instance: là 1 server ảo được tạo ra và quản lý có chức năng tượng tự như NAT Gateway
+
++ Elastic IP Address: la 1 địa chỉ public IPv4, có thể kết nối được từ Internet được sử dụng cho:
+ - EC2 instance 
+
++ Network/subnet security:
+ - Security Group: kiểm soát lưu lượng vào và ra cho các instance
+- Elastic Network Interface(ENI): phần mềm cho phép instance giao tiêp với các internet resource như các AWS service, các instance khác và internet.
+- Ngoài ra nó cũng cho phép bạn truy cập vào hệ điều hành bên trong instance để quản lý
+- Về mặt chức năng ENI  hđ giống như Internet interface của server vât lý
+- Mỗi instace đều có 1 primary network interface (primary ENI)-> kết nối với 1 mạng con. Ta không thể xóa primary ENI khỏi instance.
+
+Security Group hoạt động-> tường lửa -> bảo vệ instance khỏi cuộc tấn công mạng
+SG hd -> cấp quyền cho các traffic ra và vào instance
+1 ENI phải gắn ít nhất 1 hoặc nhiều SG và 1 SG có thể liên kết với nhiều ENI.
+Khi tạo SG phải cấu hình Inbound rule và Outbound rule.
+
+* Inbound rules
+IB chỉ ra các traffic được phép truy cập vào ENI gắn SG chưa inbound rule đó.
+Bao gồm:
+ + source 
+ + protocol
+ + port range
+
+Mặc định khi được tạo, SG sử dụng 1 cơ chế mặc định là whitelisting từ chối tất cả traffic -> vì thế phải tạo inbound rules để cho phép các request có thể truy cập vào.
+
+* Outbound rules:
+Outbound rule định nghĩa các traffic từ trong instance gửi ra ngoài thông qua ENI
++ destination
++ protocol
++ port range
+
+Mặc định khi tạo SG, nó sẽ tạo 1 rule mặc định cho phép tất cả các traffic của instance truy cập ra bên ngoài. Nếu xóa rule này đi, instance sẽ không thể truy cập được Internet được nữa
+
+* Stateful firewall: 1 SG hđ theo hướng stateful, khi 1 request được phép truy cập instance thì SG sẽ cho phép phản hồi lại request đó mà không bị ảnh hưởng bởi outbound rule.
+stateful -> request sẽ có response
+
+
+- Network ACL: giúp kiểm soát lưu lượng truy cập vào và ra cho subnet
+1 subnet chỉ có 1 NACL, 1 NACL có thể được gắn vào nhiều subnet.
+
+ + Inbound rule: định nghĩa các traffic nào được phép truy cập vào subnet
+Bao gồm:
+- Rule number: thứ tự rule, định nghĩa thứ tự xử lý của rule.
+- Protocol
+- Port range
+- Source
+- Action: gồm 2 loại allow và deny
++ Quy tắc rules của NACL được xử lý theo thứ tự tăng dần của rule number
++ Khi tạo NACL thì nó sẽ có 1 rule mặc định là chặn tất cả traffic và có rule number là (*) -> rule max nên xử lý sau cùng.
+
++ Outbound rule: định nghĩa các traffic nào được phép truy cập từ bên trong subnet ra ngoài
+- Rule number: thứ tự rule, định nghĩa thứ tự xử lý của rule.
+- Protocol
+- Port range
+- Source
+- Action: gồm 2 loại allow và deny
+ Khi tạo NACL thì nó sẽ có 1 rule mặc định là chặn tất cả traffic từ trong subnet ra.
+
++ Stateless firewall: ko tự động cho phép phản hồi các request. Vì thế ta phải cấu hình cả inbound rule và outbound rule cho request khi sử dụng NACL.
+
+Short description
+Security groups are stateful, so allowing inbound traffic to the necessary ports activates the connection. Network ACLs are stateless, so you must allow both inbound and outbound traffic.
+
+Resolution
+To turn on the connection to a service running on an instance, the associated network ACL must allow the following:
+
+Inbound traffic on the port that the service is listening on
+Outbound traffic to ephemeral ports
+
+When a client connects to a server, a random port from the ephemeral port range (1024-65535) becomes the client's source port.
+
+The designated ephemeral port becomes the destination port for return traffic from the service. Outbound traffic to the ephemeral port must be allowed in the network ACL. For more information on modifying network ACL rules
+
+
+

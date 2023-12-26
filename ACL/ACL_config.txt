@@ -1,0 +1,99 @@
+--BT4
+-
+enable
+configure terminal
+ip access-list extended BT4
+deny icmp any any echo
+permit tcp any any established
+deny tcp any any
+permit ip any any
+exit
+interface f0/0
+ip access-group BT4 in
+end
+write memory
+-
+
+--BT5
+enable
+configure terminal
+ip access-list extended BT5
+permit tcp 10.10.1.0 0.0.0.255 any eq 80 
+permit ip 10.10.1.0 0.0.0.255 10.10.4.0 0.0.0.255
+deny ip 10.10.1.0 0.0.0.255 10.10.2.0 0.0.0.255
+deny ip 10.10.1.0 0.0.0.255 10.10.3.0 0.0.0.255
+deny ip 10.10.1.0 0.0.0.255 any
+permit ip any any
+exit
+interface f0/0   
+ip access-group BT5 in
+end
+write memory
+
+
+
+enable
+configure terminal
+ip access-list extended BT6
+permit tcp 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255 eq 21
+permit tcp 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255 gt 1023
+deny ip 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255
+permit ip any any
+exit
+interface f0/1   
+ip access-group BT6 in
+end
+write memory
+
+
+
+enable
+configure terminal
+ip access-list extended BT6
+permit tcp 10.10.3.0 0.0.0.255 10.10.2.0 0.0.0.255 eq 21
+permit tcp 10.10.3.0 0.0.0.255 10.10.2.0 0.0.0.255 gt 1023
+deny ip 10.10.3.0 0.0.0.255 10.10.2.0 0.0.0.255
+permit ip any any
+exit
+interface f0/0   
+ip access-group BT6 in
+end
+write memory
+
+
+
+
+
+
+enable
+configure terminal
+ip access-list extended BT6
+permit tcp 10.10.3.0 0.0.0.255 10.10.2.0 0.0.0.255 eq 21 established
+permit tcp 10.10.3.0 0.0.0.255 10.10.2.0 0.0.0.255 gt 1023
+deny ip 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255
+permit ip any any
+exit
+interface f0/0   
+ip access-group BT6 in
+end
+write memory
+
+
+
+
+
+
+
+--BT6
+enable
+configure terminal
+ip access-list extended BT6
+5
+permit ip any any
+exit
+interface se0/0/0   
+ip access-group BT6 in
+end
+write memory
+
+

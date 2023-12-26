@@ -1,0 +1,16 @@
+enable
+configure terminal
+ip access-list extended ONE_AND_TWO_WAY
+
+permit tcp 10.10.2.0 0.0.0.255 10.10.4.0 0.0.0.255 eq 21
+permit tcp 10.10.2.0 0.0.0.255 10.10.4.0 0.0.0.255 gt 1023
+deny ip 10.10.2.0 0.0.0.255 10.10.4.0 0.0.0.255
+permit tcp 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255 eq 80
+permit tcp 10.10.2.0 0.0.0.255 eq 80 10.10.3.0 0.0.0.255
+deny ip 10.10.2.0 0.0.0.255 10.10.3.0 0.0.0.255
+permit ip any any
+exit
+interface f0/1   
+ip access-group ONE_AND_TWO_WAY in
+end
+write memory
